@@ -105,4 +105,4 @@ for f in arange(len(files)):
 	scipy.misc.imsave(datadir+'frames/frame'+'%05.f'%f+'.png', frmarr)
 
 ## Create an animation from this series
-os.system("ffmpeg -r 15 -i /Users/clowder/data/frames/frame%05d.png -vcodec libx264 -pix_fmt yuv420p -crf 22 ./solmov.mov")
+os.system("ffmpeg -r 15 -i /Users/clowder/data/frames/frame%05d.png -vcodec libx264 -pix_fmt yuv420p -crf 22 ./sol-mov.mov")
