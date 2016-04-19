@@ -34,6 +34,9 @@ qr2 = client.query(vso.attrs.Time(starttime, endtime), vso.attrs.Instrument('HMI
 files = glob.glob(datadir+'download/*')
 for f in files:
     os.remove(f)
+files = glob.glob(datadir+'frames/*')
+for f in files:
+    os.remove(f)
 
 ## Download new files
 res=client.get(qr, path=datadir+'download/{file}.fits').wait()
@@ -83,18 +86,18 @@ for f in arange(len(files)):
 		return yarr
 
 	## Define the number of mask windows
-	posarr = arange(8) * (1/7.)
+	posarr = linspace(0.1,0.9,num=8)
 
 	## For each filter, add a masked version into the output image arrays
 	frmarr = array(im304)
-	for d in arange(4): frmarr[:,:,d] = frmarr[:,:,d]*gen_filter(posarr[0],0.1)
-	for d in arange(4): frmarr[:,:,d] = frmarr[:,:,d]+im1600[:,:,d]*gen_filter(posarr[1],0.1)
-	for d in arange(4): frmarr[:,:,d] = frmarr[:,:,d]+im171[:,:,d]*gen_filter(posarr[2],0.1)
-	for d in arange(4): frmarr[:,:,d] = frmarr[:,:,d]+im193[:,:,d]*gen_filter(posarr[3],0.1)
-	for d in arange(4): frmarr[:,:,d] = frmarr[:,:,d]+im211[:,:,d]*gen_filter(posarr[4],0.1)
-	for d in arange(4): frmarr[:,:,d] = frmarr[:,:,d]+im335[:,:,d]*gen_filter(posarr[5],0.1)
-	for d in arange(4): frmarr[:,:,d] = frmarr[:,:,d]+im094[:,:,d]*gen_filter(posarr[6],0.1)
-	for d in arange(4): frmarr[:,:,d] = frmarr[:,:,d]+im131[:,:,d]*gen_filter(posarr[7],0.1)
+	for d in arange(4): frmarr[:,:,d] = frmarr[:,:,d]*gen_filter(posarr[0],0.07)
+	for d in arange(4): frmarr[:,:,d] = frmarr[:,:,d]+im1600[:,:,d]*gen_filter(posarr[1],0.07)
+	for d in arange(4): frmarr[:,:,d] = frmarr[:,:,d]+im171[:,:,d]*gen_filter(posarr[2],0.07)
+	for d in arange(4): frmarr[:,:,d] = frmarr[:,:,d]+im193[:,:,d]*gen_filter(posarr[3],0.07)
+	for d in arange(4): frmarr[:,:,d] = frmarr[:,:,d]+im211[:,:,d]*gen_filter(posarr[4],0.07)
+	for d in arange(4): frmarr[:,:,d] = frmarr[:,:,d]+im335[:,:,d]*gen_filter(posarr[5],0.07)
+	for d in arange(4): frmarr[:,:,d] = frmarr[:,:,d]+im094[:,:,d]*gen_filter(posarr[6],0.07)
+	for d in arange(4): frmarr[:,:,d] = frmarr[:,:,d]+im131[:,:,d]*gen_filter(posarr[7],0.07)
 	frmarr[:,:,3] = zeros([1024, 1024], dtype='uint8')+1.
 
 	## Normalize the image arrays, and alpha channel
@@ -105,4 +108,4 @@ for f in arange(len(files)):
 	scipy.misc.imsave(datadir+'frames/frame'+'%05.f'%f+'.png', frmarr)
 
 ## Create an animation from this series
-os.system("ffmpeg -r 15 -i /Users/clowder/data/frames/frame%05d.png -vcodec libx264 -pix_fmt yuv420p -crf 22 ./sol-mov.mov")
+os.system("ffmpeg -r 15 -i /Users/clowder/data/frames/frame%05d.png -vcodec libx264 -pix_fmt yuv420p -crf 15 ./sol-mov.mov")
