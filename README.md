@@ -3,4 +3,3 @@ Using the multiple extreme ultraviolet (EUV) filters of the AIA instrument on bo
 
 # To-do list
 - Pull HMI data as an additional source for visualization
-- Perhaps tidy the filter masks around the visible disk rather than the image boundaries...
