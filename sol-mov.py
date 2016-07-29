@@ -13,14 +13,19 @@ import glob
 import PIL
 
 ## Setup your directory location for data storage
-datadir = '/Users/clowder/data/'
+datdir = '/Users/clowder/data/'
 
 ## Define search parameters
-ndays = 4
-tsample = 0.5*u.hour
-curtime = datetime.datetime.utcnow()
-starttime = curtime - datetime.timedelta(days=ndays+1)
-endtime = curtime - datetime.timedelta(days=1)
+#ndays = 4
+#tsample = 0.5*u.hour
+#curtime = datetime.datetime.utcnow()
+#starttime = curtime - datetime.timedelta(days=ndays+1)
+#endtime = curtime - datetime.timedelta(days=1)
+
+## Manually define search parameters
+tsample = 1.0*u.hour
+starttime = datetime.datetime(2016, 6, 20, 0, 0, 0, 0)
+endtime = datetime.datetime(2016, 6, 26, 0, 0, 0, 0)
 
 ## Initialize the VSO search
 client = vso.VSOClient()
@@ -28,23 +33,23 @@ client = vso.VSOClient()
 ## Search for matching files
 ## Merge these two queries at some point...
 qr = client.query(vso.attrs.Time(starttime, endtime), vso.attrs.Instrument('AIA'), vso.attrs.Resolution(0.25), vso.attrs.Sample(tsample), vso.attrs.Wave(193*u.AA,193*u.AA) | vso.attrs.Wave(304*u.AA,304*u.AA) | vso.attrs.Wave(171*u.AA,171*u.AA) | vso.attrs.Wave(211*u.AA,211*u.AA) | vso.attrs.Wave(131*u.AA,131*u.AA) | vso.attrs.Wave(335*u.AA,335*u.AA) | vso.attrs.Wave(94*u.AA,94*u.AA) | vso.attrs.Wave(1600*u.AA,1600*u.AA))
-qr2 = client.query(vso.attrs.Time(starttime, endtime), vso.attrs.Instrument('HMI'), vso.attrs.Resolution(0.25), vso.attrs.Sample(tsample), vso.attrs.Physobs('los_magnetic_field'))
+#qr2 = client.query(vso.attrs.Time(starttime, endtime), vso.attrs.Instrument('HMI'), vso.attrs.Resolution(0.25), vso.attrs.Sample(tsample), vso.attrs.Physobs('los_magnetic_field'))
 
 ## Remove existing files
-files = glob.glob(datadir+'download/*')
+files = glob.glob(datdir+'download/*')
 for f in files:
     os.remove(f)
-files = glob.glob(datadir+'frames/*')
+files = glob.glob(datdir+'frames/*')
 for f in files:
     os.remove(f)
 
 ## Download new files
-res=client.get(qr, path=datadir+'download/{file}.fits').wait()
-res2=client.get(qr2, path=datadir+'download/{file}.fits').wait()
+res=client.get(qr, path=datdir+'download/{file}.fits').wait()
+#res2=client.get(qr2, path=datdir+'download/{file}.fits').wait()
 
 ## Grab a list of files
-files = glob.glob(datadir+'download/*0193*')
-mfiles = glob.glob(datadir+'download/hmi*')
+files = glob.glob(datdir+'download/*0193*')
+mfiles = glob.glob(datdir+'download/hmi*')
 
 ## Loop through each frame
 for f in arange(len(files)):
@@ -105,7 +110,7 @@ for f in arange(len(files)):
 	frmarr = np.uint8(frmarr * 255)
 
 	## Save this image to disk
-	scipy.misc.imsave(datadir+'frames/frame'+'%05.f'%f+'.png', frmarr)
+	scipy.misc.imsave(datdir+'frames/frame'+'%05.f'%f+'.png', frmarr)
 
 ## Create an animation from this series
-os.system("ffmpeg -r 15 -i /Users/clowder/data/frames/frame%05d.png -vcodec libx264 -pix_fmt yuv420p -crf 15 ./sol-mov.mov")
+os.system("ffmpeg -r 15 -i "+datdir+"/frames/frame%05d.png -vcodec libx264 -pix_fmt yuv420p -crf 15 ./sol-mov.mov")
