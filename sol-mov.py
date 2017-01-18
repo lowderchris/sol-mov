@@ -13,7 +13,7 @@ import glob
 import PIL
 
 ## Setup your directory location for data storage
-datdir = '/Users/clowder/data/'
+datdir = '/home/aplm/zjxt57/extra/data/'
 
 ## Define search parameters
 #ndays = 4
@@ -24,15 +24,15 @@ datdir = '/Users/clowder/data/'
 
 ## Manually define search parameters
 tsample = 1.0*u.hour
-starttime = datetime.datetime(2016, 6, 20, 0, 0, 0, 0)
-endtime = datetime.datetime(2016, 6, 26, 0, 0, 0, 0)
+starttime = datetime.datetime(2016, 1, 10, 0, 0, 0, 0)
+endtime = datetime.datetime(2016, 1, 10, 0, 30, 0, 0)
 
 ## Initialize the VSO search
 client = vso.VSOClient()
 
 ## Search for matching files
 ## Merge these two queries at some point...
-qr = client.query(vso.attrs.Time(starttime, endtime), vso.attrs.Instrument('AIA'), vso.attrs.Resolution(0.25), vso.attrs.Sample(tsample), vso.attrs.Wave(193*u.AA,193*u.AA) | vso.attrs.Wave(304*u.AA,304*u.AA) | vso.attrs.Wave(171*u.AA,171*u.AA) | vso.attrs.Wave(211*u.AA,211*u.AA) | vso.attrs.Wave(131*u.AA,131*u.AA) | vso.attrs.Wave(335*u.AA,335*u.AA) | vso.attrs.Wave(94*u.AA,94*u.AA) | vso.attrs.Wave(1600*u.AA,1600*u.AA))
+qr = client.query(vso.attrs.Time(starttime, endtime), vso.attrs.Instrument('AIA'), vso.attrs.Resolution(1.00), vso.attrs.Sample(tsample), vso.attrs.Wave(193*u.AA,193*u.AA) | vso.attrs.Wave(304*u.AA,304*u.AA) | vso.attrs.Wave(171*u.AA,171*u.AA) | vso.attrs.Wave(211*u.AA,211*u.AA) | vso.attrs.Wave(131*u.AA,131*u.AA) | vso.attrs.Wave(335*u.AA,335*u.AA) | vso.attrs.Wave(94*u.AA,94*u.AA) | vso.attrs.Wave(1600*u.AA,1600*u.AA))
 #qr2 = client.query(vso.attrs.Time(starttime, endtime), vso.attrs.Instrument('HMI'), vso.attrs.Resolution(0.25), vso.attrs.Sample(tsample), vso.attrs.Physobs('los_magnetic_field'))
 
 ## Remove existing files
@@ -48,21 +48,35 @@ res=client.get(qr, path=datdir+'download/{file}.fits').wait()
 #res2=client.get(qr2, path=datdir+'download/{file}.fits').wait()
 
 ## Grab a list of files
-files = glob.glob(datdir+'download/*0193*')
-mfiles = glob.glob(datdir+'download/hmi*')
+files = glob.glob(datdir+'download/*193a*')
+files.sort()
+#mfiles = glob.glob(datdir+'download/hmi*')
+#mfiles.sort()
 
 ## Loop through each frame
 for f in arange(len(files)):
 
 	## Load each filter into a separate sunpy map object
-	m193 = sunpy.map.Map(files[f][:-14]+'0193.fits.fits')
-	m304 = sunpy.map.Map(files[f][:-14]+'0304.fits.fits')
-	m171 = sunpy.map.Map(files[f][:-14]+'0171.fits.fits')
-	m211 = sunpy.map.Map(files[f][:-14]+'0211.fits.fits')
-	m131 = sunpy.map.Map(files[f][:-14]+'0131.fits.fits')
-	m335 = sunpy.map.Map(files[f][:-14]+'0335.fits.fits')
-	m094 = sunpy.map.Map(files[f][:-14]+'0094.fits.fits')
-	m1600 = sunpy.map.Map(files[f][:-14]+'1600.fits.fits')
+        ## Resample images as you go to save on memory
+        redim = u.Quantity([1024, 1024], u.pixel)
+
+	m193 = sunpy.map.Map(datdir + 'download/' + files[f][len(datdir)+9:][0:9] + '193a' + files[f][-45:])
+        m193 = m193.resample(redim)
+	m304 = sunpy.map.Map(datdir + 'download/' + files[f][len(datdir)+9:][0:9] + '304a' + files[f][-45:])
+        m304 = m304.resample(redim)
+	m171 = sunpy.map.Map(datdir + 'download/' + files[f][len(datdir)+9:][0:9] + '171a' + files[f][-45:])
+        m171 = m171.resample(redim)
+	m211 = sunpy.map.Map(datdir + 'download/' + files[f][len(datdir)+9:][0:9] + '211a' + files[f][-45:])
+        m211 = m211.resample(redim)
+	m131 = sunpy.map.Map(datdir + 'download/' + files[f][len(datdir)+9:][0:9] + '131a' + files[f][-45:])
+        m131 = m131.resample(redim)
+	m335 = sunpy.map.Map(datdir + 'download/' + files[f][len(datdir)+9:][0:9] + '335a' + files[f][-45:])
+        m335 = m335.resample(redim)
+	m094 = sunpy.map.Map(datdir + 'download/' + files[f][len(datdir)+9:][0:9] + '94a' + files[f][-45:])
+        m094 = m94.resample(redim)
+	m1600 = sunpy.map.Map(datdir + 'download/' + files[f][len(datdir)+9:][0:9] + '1600a' + files[f][-45:])
+        m1600 = m1600.resample(redim)
+
 
 	## Normalize to exposure time, and make some 'brightness' adjustments
 	d193 = log((abs(m193.data) / float(m193.exposure_time/u.second) / 2000 * 10)+1.)
